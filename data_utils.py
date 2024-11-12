@@ -201,3 +201,69 @@ def load_stringer_data(animal_name, window_size, data_dir='./'):
     print('data_matrix.shape', data_matrix.shape)
     return data_matrix, area_labels, f['brainLoc']
 
+
+##### Load different datasets ######
+def load_data(args, program_name):
+    """
+    Parameters:
+    -   args (argparse object): arguments
+    -   program_name (str): Name of the computed program (e.g., Entropy, Curvature, etc.) which
+                            will be added to the save_name to differentiate between files
+
+    Returns: 
+    -   X (np.array): Data matrix. Shape: (n_samples) x n_neurons/n_rois/ x n_timeframes
+    -   d (dict): dictionary to save results and meta data
+    -   save_name (str): Indices corresponding to area_labels for each neuron
+    """
+    os.makedirs('./results/{program_name}', exist_ok=True)
+    d = {'meta_data': {'data_set': args.data_set, 'n_shuffles': args.n_shuffles, 'dt': args.dt}}
+    roi = f'_{args.roi}' if args.roi else ''
+    if args.data_set.lower() == 'stringer': 
+        X, area_labels, locations = load_stringer_data(args.animal_name, args.window_size, 
+                                                        data_dir=args.data_dir)
+
+        if args.roi:
+            d['meta_data']['roi'] = args.roi
+            try:
+                neuron_i = area_labels.index(args.roi) + 1
+            except:
+                raise ValueError ('Input for roi is not a valid region in the data set', area_labels)
+            X = X[np.where(locations == neuron_i)[0]]
+        d['meta_data']['animal_name'] = args.animal_name
+        d['meta_data']['window_size'] = args.window_size
+        d['meta_data']['area_labels'] = area_labels
+        d['meta_data']['locations'] = locations
+        d['meta_data']['HZ'] = 30 / args.window_size
+        save_name = f'./results/{program_name}/{program_name}_{args.data_set}_{args.animal_name}_{args.dt}dt_{args.window_size}windowsize{roi}.npz'
+        
+
+    elif args.data_set.lower() == 'human':
+        X, area_labels, locations = load_fmri_data(data_dir=args.data_dir)
+        d['meta_data']['area_labels'] = area_labels
+        d['meta_data']['locations'] = locations
+        # ToDo Add stuff for ROIs
+        if args.roi:
+            d['meta_data']['roi'] = args.roi
+            try:
+                area_i = area_labels.index(args.roi)
+            except:
+                raise ValueError ('Input for roi is not a valid region in the data set', area_labels)
+            X = X[:, np.where(locations == area_i)[0]]
+
+        X = [x for x in X]
+        save_name = f'./results/{program_name}/{program_name}_{args.data_set}_{args.dt}dt{roi}.npz'
+
+    elif args.data_set.lower() == 'ferret':
+        X = load_ferret_data(EO=args.EO, condition=args.condition, fDiff=args.FDiff, data_dir=args.data_dir)
+        d['meta_data']['EO'] = args.EO
+        d['meta_data']['condition'] = args.condition
+        d['meta_data']['FDiff'] = args.FDiff
+        fd = 'FDiff' if args.FDiff else 'Orig'
+        save_name = f'./results/{program_name}/{program_name}_{args.data_set}_{args.EO}EO_{args.condition}_{fd}_{args.dt}dt{roi}.npz'
+
+    elif args.data_set.lower() == 'monkey':
+        X = load_monkey_data(data_dir=args.data_dir)
+        save_name = f'./results/{program_name}/{program_name}_{args.data_set}_{args.dt}dt{roi}.npz'
+    else:
+        raise ValueError('Input for data_set has to be stringer, human, ferret, or monkey.')
+    return X, d, save_name
