@@ -215,7 +215,7 @@ def load_data(args, program_name):
     -   d (dict): dictionary to save results and meta data
     -   save_name (str): Indices corresponding to area_labels for each neuron
     """
-    os.makedirs('./results/{program_name}', exist_ok=True)
+    os.makedirs(f'./results/{program_name}', exist_ok=True)
     d = {'meta_data': {'data_set': args.data_set, 'n_shuffles': args.n_shuffles, 'dt': args.dt}}
     roi = f'_{args.roi}' if args.roi else ''
     if args.data_set.lower() == 'stringer': 
