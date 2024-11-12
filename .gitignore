@@ -167,3 +167,4 @@ results/
 *.job
 *.sh
 .DS_Store
+out_sbatch
