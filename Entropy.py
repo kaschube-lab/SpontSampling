@@ -133,7 +133,7 @@ if __name__ == '__main__':
         if sample_i == 0:
             print('x.shape', x.shape)
         if sample_i % 100 == 0:
-            print(i, end=',')
+            print(sample_i, end=',')
 
         d = compute_entropy_measures_increasing_frames(x, d, save_name, sample_i, args)
 
