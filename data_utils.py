@@ -151,7 +151,7 @@ def preprocess_monkey_ephys_data(bin_size=1000, shift=1):
     return all_spike_ts, firing_rates
 
 
-def load_monkey_data(data_dir=='./', bin_size=100):
+def load_monkey_data(data_dir='./', bin_size=100):
     """
     Loads the ephys data from macaque monkeys 
 
