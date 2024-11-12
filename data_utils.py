@@ -181,7 +181,7 @@ def calc_windowed_spike_matrix(spike_matrix, window_size):
 
 
 
-def load_stringer_data(animal_name, window_size, base_dir=='./'):
+def load_stringer_data(animal_name, window_size, base_dir='./'):
     """
     Loads the sponanteous neuropixels data from the stringer paper
 
