@@ -31,7 +31,7 @@ def compute_entropy_measures_increasing_frames(X, d_results, save_name, sample_i
     n_neurons, max_time_frames = X.shape
     
 
-
+    # Add initializations for the entropy computation to the results dictionary
     d_results[f'sample_{sample_i}'] = {
         'sample_entropy': [np.empty((args.n_inits, n_neurons, args.steps))],
         'sample_entropy_random': np.empty((args.num_shuffles, args.n_inits, n_neurons, args.steps)),
@@ -58,28 +58,27 @@ def compute_entropy_measures_increasing_frames(X, d_results, save_name, sample_i
         start_frame = np.random.randint(max_time_frames - (args.steps + args.min_frames))
         # Loop over each neuron
         for i in range(n_neurons):
-            neuron_data = average_spike_count[i, :]
+            neuron_data = X[i, :]
             print(i, end=',', flush=True)
             # Loop over the range of increasing frames
             for step in range(0, args.steps, args.step_size):
                 frame_count = args.min_frames + step
                 if frame_count > max_time_frames:
                     break
-                data_subset = neuron_data[start_frame:start_frame+frame_count]
+                x = neuron_data[start_frame:start_frame+frame_count]
 
                 # Calculate entropy and complexity metrics for the current frame count
-                
-                d_results[f'sample_{sample_i}']['sample_entropy'][j, i, step] = nk.entropy_sample(data_subset)[0]
-                d_results[f'sample_{sample_i}']['approximate_entropy'][j, i, step] = nk.entropy_approximate(data_subset)[0]
-                d_results[f'sample_{sample_i}']['fuzzy_entropy'][j, i, step] = nk.entropy_fuzzy(data_subset)[0]
-                d_results[f'sample_{sample_i}']['weighted_permutation_entropy'][j, i, step] = nk.entropy_permutation(data_subset, weighted=True)[0]
-                # d_results[f'sample_{sample_i}']['hurst_exponent'][j, i, step] = nk.fractal_hurst(data_subset)
-                # d_results[f'sample_{sample_i}']['lyapunov_exponent'][j, i, step] = nk.entropy_lyapunov(data_subset)
-                d_results[f'sample_{sample_i}']['fractal_dimension_katz'][j, i, step] = nk.fractal_katz(data_subset)[0]
-                d_results[f'sample_{sample_i}']['fisher_information'][j, i, step] = nk.fisher_information(data_subset)[0]
+                d_results[f'sample_{sample_i}']['sample_entropy'][j, i, step] = nk.entropy_sample(x)[0]
+                d_results[f'sample_{sample_i}']['approximate_entropy'][j, i, step] = nk.entropy_approximate(x)[0]
+                d_results[f'sample_{sample_i}']['fuzzy_entropy'][j, i, step] = nk.entropy_fuzzy(x)[0]
+                d_results[f'sample_{sample_i}']['weighted_permutation_entropy'][j, i, step] = nk.entropy_permutation(x, weighted=True)[0]
+                # d_results[f'sample_{sample_i}']['hurst_exponent'][j, i, step] = nk.fractal_hurst(x)
+                # d_results[f'sample_{sample_i}']['lyapunov_exponent'][j, i, step] = nk.entropy_lyapunov(x)
+                d_results[f'sample_{sample_i}']['fractal_dimension_katz'][j, i, step] = nk.fractal_katz(x)[0]
+                d_results[f'sample_{sample_i}']['fisher_information'][j, i, step] = nk.fisher_information(x)[0]
                 
                 for shuffle_i in range(args.num_shuffles):
-                    shuffled_data = np.random.permutation(data_subset)
+                    shuffled_data = np.random.permutation(x)
                     d_results[f'sample_{sample_i}']['sample_entropy_random'][shuffle_i, j, i, step] = nk.entropy_sample(shuffled_data)[0]
                     d_results[f'sample_{sample_i}']['approximate_entropy_random'][shuffle_i, j, i, step] = nk.entropy_approximate(shuffled_data)[0]
                     d_results[f'sample_{sample_i}']['fuzzy_entropy_random'][shuffle_i, j, i, step] = nk.entropy_fuzzy(shuffled_data)[0]
@@ -89,6 +88,7 @@ def compute_entropy_measures_increasing_frames(X, d_results, save_name, sample_i
                     d_results[f'sample_{sample_i}']['fractal_dimension_katz_random'][shuffle_i, j, i, step] = nk.fractal_katz(shuffled_data)[0]
                     d_results[f'sample_{sample_i}']['fisher_information_random'][shuffle_i, j, i, step] = nk.fisher_information(shuffled_data)[0]
         print('')  
+        # Intermediate save, as the computation takes long and in case of a program failure and to analyze intermediate results
         np.savez_compressed(save_name, **d_results)      
 
     return d_results
@@ -97,9 +97,9 @@ def compute_entropy_measures_increasing_frames(X, d_results, save_name, sample_i
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
-                    prog='ProgramName',
-                    description='What the program does',
-                    epilog='Text at the bottom of help')
+                    prog='Entropy',
+                    description='Computes the change in entropy in the data with an increasing number of frames \
+                    across different random starting points')
     parser.add_argument('-d', '--data_set', type=str, default='Stringer', help='Name of the data set to use')
     parser.add_argument('--min_frames', type=int, default=5, help='Minimum number of frames to use')
     parser.add_argument('--steps', type=int, default=400, help='Number of time frames to compute the entropy for')
