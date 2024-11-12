@@ -221,7 +221,7 @@ def load_data(args, program_name):
     if args.data_set.lower() == 'stringer': 
         X, area_labels, locations = load_stringer_data(args.animal_name, args.window_size, 
                                                         data_dir=args.data_dir)
-
+        X = [X] # to bring in same format as the other data
         if args.roi:
             d['meta_data']['roi'] = args.roi
             try:
@@ -255,6 +255,7 @@ def load_data(args, program_name):
 
     elif args.data_set.lower() == 'ferret':
         X = load_ferret_data(EO=args.EO, condition=args.condition, fDiff=args.FDiff, data_dir=args.data_dir)
+        X = [X] # to bring in same format as the other data
         d['meta_data']['EO'] = args.EO
         d['meta_data']['condition'] = args.condition
         d['meta_data']['FDiff'] = args.FDiff
@@ -266,4 +267,5 @@ def load_data(args, program_name):
         save_name = f'./results/{program_name}/{program_name}_{args.data_set}_{args.dt}dt{roi}.npz'
     else:
         raise ValueError('Input for data_set has to be stringer, human, ferret, or monkey.')
+    d['meta_data']['n_samples'] = len(X)
     return X, d, save_name
