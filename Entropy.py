@@ -28,7 +28,9 @@ def compute_entropy_measures_increasing_frames(X, d_results, save_name, sample_i
     - d (dict): Dictionary containing entropy and complexity metrics for each neuron and frame increment.
     """
     np.random.seed(args.seed)
-    n_neurons, max_time_frames = X.shape
+    n_neurons, n_timeframes = X.shape
+    n_frames_dt = n_timeframes // args.dt
+    X = X[:, :int(n_frames_dt*args.dt)]
     
 
     # Add initializations for the entropy computation to the results dictionary
@@ -49,23 +51,22 @@ def compute_entropy_measures_increasing_frames(X, d_results, save_name, sample_i
         'fisher_information_random': np.empty((args.n_shuffles, args.n_inits, n_neurons, args.steps)),
         }
 
-    
-    
 
     # Loop over initializations 
     for j in range(args.n_inits):
         print(j, end=': ', flush=True)
-        start_frame = np.random.randint(max_time_frames - (args.steps + args.min_frames))
+        start_frame = np.random.randint(n_frames_dt - (args.steps + args.min_frames))
+        X_subset = X[:, start_frame::args.dt]
+        n_timeframes = X_subset.shape[-1]
         # Loop over each neuron
         for i in range(n_neurons):
-            neuron_data = X[i, :]
             print(i, end=',', flush=True)
             # Loop over the range of increasing frames
             for step in range(0, args.steps, args.step_size):
                 frame_count = args.min_frames + step
-                if frame_count > max_time_frames:
+                if frame_count > n_timeframes:
                     break
-                x = neuron_data[start_frame:start_frame+frame_count]
+                x = X_subset[i, start_frame:start_frame+frame_count]
 
                 # Calculate entropy and complexity metrics for the current frame count
                 d_results[f'sample_{sample_i}']['sample_entropy'][j, i, step] = nk.entropy_sample(x)[0]
@@ -92,6 +93,50 @@ def compute_entropy_measures_increasing_frames(X, d_results, save_name, sample_i
         np.savez_compressed(save_name, **d_results)      
 
     return d_results
+
+
+def reformant_entropy_stringer():
+    """
+    Because stringer data took long to compute the entropy, I split it in batches of 5. 
+    This code adds it together and also saves a single file for each metric. 
+    """
+    metrics = ['sample_entropy', 'approximate_entropy', 'fuzzy_entropy', 'weighted_permutation_entropy',
+           'fractal_dimension_katz', 'fisher_information']
+
+    mice = ['Krebs',  'Robbins', 'Waksman']
+
+    for mouse in mice:
+        print(mouse, end=',')
+        f = scipy.io.loadmat(f'./data/StringerNeuropixels/{mouse}withFaces_KS2.mat')
+        area_labels = [x[0] for x in f['areaLabels'][0]]
+        locations = f['brainLoc']
+        ds = []
+        for i in range(4):
+            ds.append(np.load(f'./results/Entropy/Entropy_Stringer_neuropixels_{mouse}_{i}.npz'))
+        for metric in metrics:
+            print(metric, end='. ')
+            entropy_results, entropy_random = [], []
+            for d in ds:
+                entropy_results.append(d[metric])
+                entropy_random.append(d[f'{metric}_random'])
+            entropy_results = np.concatenate(entropy_results, axis=0)
+            entropy_random = np.concatenate(entropy_random, axis=1)
+            d_dict = dict(d)
+            d_new = {metric: entropy_results, 
+                    f'{metric}_random': entropy_random, 
+                    'meta_data': {
+                        'area_labels': area_labels,
+                        'locations': locations,
+                        'initial_frame': d_dict['initial_frame'],
+                        'steps': d_dict['steps'],
+                        'n_shuffles': d_dict['num_shuffles'],
+                        'n_inits': d_dict['n_inits'],
+                        'seed': d_dict['seed'],
+                        'shape': d_dict['shape'],
+                        'shape_rand': d_dict['shape_rand'],
+                        'Hz': d_dict['Hz']                
+                    }}
+            np.savez_compressed(f'./results/Entropy/Entropy_Stringer_neuropixels_{metric}_{mouse}.npz', **d_new)
 
 
 if __name__ == '__main__':
