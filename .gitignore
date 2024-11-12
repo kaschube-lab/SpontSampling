@@ -166,3 +166,4 @@ data/
 results/
 *.job
 *.sh
+.DS_Store
