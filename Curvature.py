@@ -1,7 +1,7 @@
 import numpy as np
 import math
 import argparse
-from data_utils import  load_monkey_data, load_stringer_data, load_ferret_data, load_fmri_data
+from data_utils import  load_data
 
 
 def calc_curvature(X, degrees=False):
