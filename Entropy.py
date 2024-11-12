@@ -12,7 +12,7 @@ warnings.filterwarnings("ignore")
 
 
 def compute_entropy_measures_increasing_frames(X, d_results, save_name, sample_i, args):
-    # initial_frame, steps, num_shuffles, n_inits):
+    # initial_frame, steps, n_shuffles, n_inits):
     """
     Compute entropy and complexity metrics on an increasing number of time frames for each neuron.
 
@@ -34,19 +34,19 @@ def compute_entropy_measures_increasing_frames(X, d_results, save_name, sample_i
     # Add initializations for the entropy computation to the results dictionary
     d_results[f'sample_{sample_i}'] = {
         'sample_entropy': [np.empty((args.n_inits, n_neurons, args.steps))],
-        'sample_entropy_random': np.empty((args.num_shuffles, args.n_inits, n_neurons, args.steps)),
+        'sample_entropy_random': np.empty((args.n_shuffles, args.n_inits, n_neurons, args.steps)),
         'approximate_entropy': np.empty((args.n_inits, n_neurons, args.steps)),
-        'approximate_entropy_random': np.empty((args.num_shuffles, args.n_inits, n_neurons, args.steps)),
+        'approximate_entropy_random': np.empty((args.n_shuffles, args.n_inits, n_neurons, args.steps)),
         'fuzzy_entropy': np.empty((args.n_inits, n_neurons, args.steps)),
-        'fuzzy_entropy_random': np.empty((args.num_shuffles, args.n_inits, n_neurons, args.steps)),
+        'fuzzy_entropy_random': np.empty((args.n_shuffles, args.n_inits, n_neurons, args.steps)),
         'weighted_permutation_entropy': np.empty((args.n_inits, n_neurons, args.steps)),
-        'weighted_permutation_entropy_random': np.empty((args.num_shuffles, args.n_inits, n_neurons, args.steps)),
+        'weighted_permutation_entropy_random': np.empty((args.n_shuffles, args.n_inits, n_neurons, args.steps)),
         #'hurst_exponent': np.empty((n_neurons, args.steps)),
         #'lyapunov_exponent': np.empty((n_neurons, args.steps)),
         'fractal_dimension_katz': np.empty((args.n_inits, n_neurons, args.steps)),
-        'fractal_dimension_katz_random': np.empty((args.num_shuffles, args.n_inits, n_neurons, args.steps)),
+        'fractal_dimension_katz_random': np.empty((args.n_shuffles, args.n_inits, n_neurons, args.steps)),
         'fisher_information': np.empty((args.n_inits, n_neurons, args.steps)),
-        'fisher_information_random': np.empty((args.num_shuffles, args.n_inits, n_neurons, args.steps)),
+        'fisher_information_random': np.empty((args.n_shuffles, args.n_inits, n_neurons, args.steps)),
         }
 
     
@@ -77,7 +77,7 @@ def compute_entropy_measures_increasing_frames(X, d_results, save_name, sample_i
                 d_results[f'sample_{sample_i}']['fractal_dimension_katz'][j, i, step] = nk.fractal_katz(x)[0]
                 d_results[f'sample_{sample_i}']['fisher_information'][j, i, step] = nk.fisher_information(x)[0]
                 
-                for shuffle_i in range(args.num_shuffles):
+                for shuffle_i in range(args.n_shuffles):
                     shuffled_data = np.random.permutation(x)
                     d_results[f'sample_{sample_i}']['sample_entropy_random'][shuffle_i, j, i, step] = nk.entropy_sample(shuffled_data)[0]
                     d_results[f'sample_{sample_i}']['approximate_entropy_random'][shuffle_i, j, i, step] = nk.entropy_approximate(shuffled_data)[0]
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     parser.add_argument('--min_frames', type=int, default=5, help='Minimum number of frames to use')
     parser.add_argument('--steps', type=int, default=400, help='Number of time frames to compute the entropy for')
     parser.add_argument('--step_size', type=int, default=1, help='step size to increase the number of frames')
-    parser.add_argument('--num_shuffles', type=int, default=100, help='Number of random shuffles')
+    parser.add_argument('--n_shuffles', type=int, default=100, help='Number of random shuffles')
     parser.add_argument('--n_inits', type=int, default=20, help='Number of starting conditions')
     parser.add_argument('--data_dir', type=str, default='./', help='directory to the data (without the data folder)')
     parser.add_argument('--window_size', type=int, default=10, help='Non-overlapping sliding window width')
@@ -122,17 +122,17 @@ if __name__ == '__main__':
 
     d['meta_data'].update({'min_frames': args.min_frames, 
                             'steps': args.steps, 
-                            'num_shuffles': args.num_shuffles, 
+                            'n_shuffles': args.n_shuffles, 
                             'n_inits': args.n_inits,
                             'seed': args.seed,
                             'shape': ('n_inits', 'n_neurons', 'steps'),
-                            'shape_rand': ('num_shuffles', 'n_inits', 'n_neurons', 'steps')})
+                            'shape_rand': ('n_shuffles', 'n_inits', 'n_neurons', 'steps')})
 
     
     for sample_i, x in enumerate(X):
-        if i == 0:
+        if sample_i == 0:
             print('x.shape', x.shape)
-        if i % 100 == 0:
+        if sample_i % 100 == 0:
             print(i, end=',')
 
         d = compute_entropy_measures_increasing_frames(x, d, save_name, sample_i, args)
