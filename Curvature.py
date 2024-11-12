@@ -157,51 +157,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     print(args)
 
-    d = {'data_set': args.data_set, 'n_shuffles': args.n_shuffles, 'dt': args.dt}
-    roi = f'_{args.roi}' if args.roi else ''
-    if args.data_set.lower() == 'stringer': 
-        X, area_labels, locations = load_stringer_data(args.animal_name, args.window_size)
-
-        if args.roi:
-            d['roi'] = args.roi
-            try:
-                neuron_i = area_labels.index(args.roi) + 1
-            except:
-                raise ValueError ('Input for roi is not a valid region in the data set', area_labels)
-            X = X[np.where(locations == neuron_i)[0]]
-        d['animal_name'] = args.animal_name
-        d['window_size'] = args.window_size
-        d['HZ'] = 30 / args.window_size
-        save_name = f'./results/Curvature/Curvature_{args.data_set}_{args.animal_name}_{args.dt}dt_{args.window_size}windowsize{roi}.npz'
-        
-
-    elif args.data_set.lower() == 'human':
-        X, area_labels, locations = load_fmri_data()
-        # ToDo Add stuff for ROIs
-        if args.roi:
-            d['roi'] = args.roi
-            try:
-                area_i = area_labels.index(args.roi)
-            except:
-                raise ValueError ('Input for roi is not a valid region in the data set', area_labels)
-            X = X[:, np.where(locations == area_i)[0]]
-
-        X = [x for x in X]
-        save_name = f'./results/Curvature/Curvature_{args.data_set}_{args.dt}dt{roi}.npz'
-
-    elif args.data_set.lower() == 'ferret':
-        X = load_ferret_data(EO=args.EO, condition=args.condition, fDiff=args.FDiff)
-        d['EO'] = args.EO
-        d['condition'] = args.condition
-        d['FDiff'] = args.FDiff
-        fd = 'FDiff' if args.FDiff else 'Orig'
-        save_name = f'./results/Curvature/Curvature_{args.data_set}_{args.EO}EO_{args.condition}_{fd}_{args.dt}dt{roi}.npz'
-
-    elif args.data_set.lower() == 'monkey':
-        X = load_monkey_data()
-        save_name = f'./results/Curvature/Curvature_{args.data_set}_{args.dt}dt{roi}.npz'
-    else:
-        raise ValueError('Input for data_set has to be stringer, human, ferret, or monkey.')
+    X, d, save_name = load_data(args, 'Curvature')
 
     if type(X) == type([]):
         curvatures, curvatures_shuffled = [], []
