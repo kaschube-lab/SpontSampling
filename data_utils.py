@@ -221,7 +221,6 @@ def load_data(args, program_name):
     if args.data_set.lower() == 'stringer': 
         X, area_labels, locations = load_stringer_data(args.animal_name, args.window_size, 
                                                         data_dir=args.data_dir)
-        X = [X] # to bring in same format as the other data
         if args.roi:
             d['meta_data']['roi'] = args.roi
             try:
@@ -229,6 +228,9 @@ def load_data(args, program_name):
             except:
                 raise ValueError ('Input for roi is not a valid region in the data set', area_labels)
             X = X[np.where(locations == neuron_i)[0]]
+            if len(X) == 0:
+                raise ValueError (f'Area {args.roi} not in dataset')
+        X = [X] # to bring in same format as the other data
         d['meta_data']['animal_name'] = args.animal_name
         d['meta_data']['window_size'] = args.window_size
         d['meta_data']['area_labels'] = area_labels

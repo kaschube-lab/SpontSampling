@@ -141,6 +141,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
                     prog='Calculate curvature')
     parser.add_argument('-d', '--data_set', type=str, default='Stringer', help='Name of the data set to use')
+    parser.add_argument('--data_dir', type=str, default='./', help='directory to the data (without the data folder)')
     #parser.add_argument('--initial_frame', type=int, default=5, help='Minimum number of frames to use')
     #parser.add_argument('--steps', type=int, default=400, help='Number of time frames to compute the entropy for')
     parser.add_argument('--n_shuffles', type=int, default=100, help='Number of random shuffles')
