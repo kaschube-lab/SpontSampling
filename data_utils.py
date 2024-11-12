@@ -31,7 +31,7 @@ def load_smaller_fov(data_path, size):
     return act_square.ravel()
     
 
-def load_ferret_data(EO='before', condition='awake', fDiff=False):
+def load_ferret_data(base_dir='./', EO='before', condition='awake', fDiff=False):
     """
     Loads the ferret data from Trägenap et al. (2023)?
     Parameters:
@@ -43,7 +43,7 @@ def load_ferret_data(EO='before', condition='awake', fDiff=False):
     -   activity (np.array): contains the activity in the form pixels x time frames
     """
     fd = '_FirstDiff' if fDiff else ''
-    data_path = f'./data/Ferret/{EO}EO/spont/{condition}/DF_by_F0_Resize4x{fd}_bandpass_1_7.5.npy'
+    data_path = os.path.join(base_dir, f'./data/Ferret/{EO}EO/spont/{condition}/DF_by_F0_Resize4x{fd}_bandpass_1_7.5.npy')
     data = np.load(data_path)
     nan_indices = np.where(np.isnan(np.mean(data, axis=0)))[0]
 
@@ -63,8 +63,8 @@ def load_ferret_data(EO='before', condition='awake', fDiff=False):
 
 
 
-def load_fmri_data():
-    raw = sio.loadmat("./data/Human/NKI_281_Yeo_114.mat")['subjects']
+def load_fmri_data(base_dir='./'):
+    raw = sio.loadmat(os.path.join(base_dir, "data/Human/NKI_281_Yeo_114.mat"))['subjects']
     # sort_raw_to_orig_indices
     id_raw = np.zeros(281, dtype=int)
     for i in range(281):
@@ -151,7 +151,7 @@ def preprocess_monkey_ephys_data(bin_size=1000, shift=1):
     return all_spike_ts, firing_rates
 
 
-def load_monkey_data(bin_size=100):
+def load_monkey_data(base_dir=='./', bin_size=100):
     """
     Loads the ephys data from macaque monkeys 
 
@@ -161,7 +161,7 @@ def load_monkey_data(bin_size=100):
     Returns: 
     -   data (list): List of neural activations for all trials (shapes: n_neurons, n_timeframes)
     """
-    d = np.load(f'./data/Monkey/pvc_11_{bin_size}ms.npz')
+    d = np.load(os.path.join(base_dir, f'data/Monkey/pvc_11_{bin_size}ms.npz'))
     data = []
     for i in range(6):
         data.append(d[f'Trial_{i}'].T)
@@ -181,7 +181,7 @@ def calc_windowed_spike_matrix(spike_matrix, window_size):
 
 
 
-def load_stringer_data(animal_name, window_size):
+def load_stringer_data(base_dir=='./', animal_name, window_size):
     """
     Loads the sponanteous neuropixels data from the stringer paper
 
@@ -195,7 +195,7 @@ def load_stringer_data(animal_name, window_size):
     -   locations (np.array): Indices corresponding to area_labels for each neuron
     """
 
-    f = sio.loadmat(f'./data/StringerNeuropixels/{animal_name}withFaces_KS2.mat')
+    f = sio.loadmat(os.path.join(base_dir, f'./data/StringerNeuropixels/{animal_name}withFaces_KS2.mat'))
     data_matrix = calc_windowed_spike_matrix(f['stall'], window_size)
     area_labels = [x[0] for x in f['areaLabels'][0]]
     print('data_matrix.shape', data_matrix.shape)
