@@ -33,7 +33,7 @@ def compute_entropy_measures_increasing_frames(X, d_results, save_name, sample_i
 
     # Add initializations for the entropy computation to the results dictionary
     d_results[f'sample_{sample_i}'] = {
-        'sample_entropy': [np.empty((args.n_inits, n_neurons, args.steps))],
+        'sample_entropy': np.empty((args.n_inits, n_neurons, args.steps)),
         'sample_entropy_random': np.empty((args.n_shuffles, args.n_inits, n_neurons, args.steps)),
         'approximate_entropy': np.empty((args.n_inits, n_neurons, args.steps)),
         'approximate_entropy_random': np.empty((args.n_shuffles, args.n_inits, n_neurons, args.steps)),
