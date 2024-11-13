@@ -18,6 +18,7 @@ def get_args():
     parser.add_argument('--n_shuffles', type=int, default=100, help='Number of random shuffles')
     parser.add_argument('--n_inits', type=int, default=20, help='Number of starting conditions')
     parser.add_argument('--data_dir', type=str, default='./', help='directory to the data (without the data folder)')
+    parser.add_argument('--save_dir', type=str, default='./', help='directory where to save results (without the results folder)')
     parser.add_argument('--window_size', type=int, default=10, help='Non-overlapping sliding window width')
     parser.add_argument('--animal_name', type=str, default='Krebs', help='Name of animal to load')
     parser.add_argument('--seed', type=int, default=0, help='initialization seed for random selection of start frames')
@@ -126,7 +127,7 @@ def get_save_path(args):
     -   save_path (str): Path (incl. dir and file name) for storing the results
     """
     functions = '_'.join(args.functions.split(';'))
-    res_dir = os.path.join('./results', functions)
+    res_dir = os.path.join(args.save_dir, 'results', functions)
     os.makedirs(res_dir, exist_ok=True)
     save_name = f'{functions}_{args.data_set}_{args.dt}dt'
     if args.data_set.lower() == 'stringer':
