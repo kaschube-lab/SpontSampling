@@ -58,7 +58,7 @@ def init_results_dict(n_samples, area_labels, locations, args):
         
     if type(area_labels) is not type(None):
          d_results['meta_data']['area_labels'] = area_labels
-    if type(locations) is not type(None) 
+    if type(locations) is not type(None): 
         d_results['meta_data']['locations'] = locations
     return d_results
 
