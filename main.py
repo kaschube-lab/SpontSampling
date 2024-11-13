@@ -45,5 +45,4 @@ def main(args):
 if __name__ == '__main__':
 
     args = get_args()
-    
-    d_results = main(args)
+    main(args)
