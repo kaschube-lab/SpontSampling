@@ -1,4 +1,4 @@
-from utils import init_results_dict, init_func_res
+from utils import get_args, init_results_dict, update_res_dict, get_save_path
 from Curvature import calc_curvature_full
 from Dimensionality import calc_dimensionality_increasing_frames
 from Entropy import calc_entropy_measures_increasing_frames
@@ -47,11 +47,3 @@ if __name__ == '__main__':
     args = get_args()
     
     d_results = main(args)
-
-
-    
-        
-
-
-
-    d_results = init_func_res(d_results, function, n_samples, n_neurons, dt, n_frames_dt, args)
