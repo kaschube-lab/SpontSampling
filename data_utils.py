@@ -208,7 +208,7 @@ def load_data(args):
     Parameters:
     -   args (argparse object): arguments
     Returns: 
-    -   X (np.array): Data matrix. Shape: (n_samples) x n_neurons/n_rois/ x n_timeframes
+    -   X ([np.array]): List with data matrices. Shape: (n_samples) x n_neurons/n_rois/ x n_timeframes
     """
     area_labels, locations = None, None
     if args.data_set.lower() == 'stringer': 
