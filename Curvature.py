@@ -1,7 +1,5 @@
 import numpy as np
 import math
-import argparse
-from data_utils import  load_data
 
 
 def calc_curvature(X, degrees=False):
@@ -115,69 +113,18 @@ def calc_curvature_incrasing(X, initial_frame, steps, num_shuffles=0, n_inits=0,
     return d
 
 
-def calc_curvature_full(X, dt, n_shuffle):
+def calc_curvature_full(x, d_results_sample, args):
     n_neurons, n_timeframes = X.shape
-    n_frames_dt = n_timeframes // dt
+    n_frames_dt = n_timeframes // args.dt
 
-    X = X[:, :int(n_frames_dt*dt)]
+    x = x[:, :int(n_frames_dt*args.dt)]
 
-    curvatures = np.empty((dt, n_frames_dt - 2))
-    curvatures_shuffled = np.empty((n_shuffle, dt, n_frames_dt - 2))
-
-    for d in range(dt):
-        X_subset = X[:, d::dt]
+    for d in range(args.dt):
+        x_subset = x[:, d::args.dt]
         # print('X_subset.shape', X_subset.shape, 'n_frames_dt - 2', n_frames_dt - 2)
-        curvatures[d] = calc_curvature(X_subset, degrees=True)
+        d_results_sample['curvatures'][d] = calc_curvature(x_subset, degrees=True)
 
-        for shuffle in range(n_shuffle):
-            X_shuffled = np.apply_along_axis(np.random.permutation, 1, X_subset)
-            curvatures_shuffled[shuffle, d] = calc_curvature(X_shuffled, degrees=True)
-    
-    return curvatures, curvatures_shuffled
+        for shuffle in range(args.n_shuffle):
+            X_shuffled = np.apply_along_axis(np.random.permutation, 1, x_subset)
+            d_results_sample['curvatures_random'][shuffle, d] = calc_curvature(X_shuffled, degrees=True)
 
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-                    prog='Calculate curvature')
-    parser.add_argument('-d', '--data_set', type=str, default='Stringer', help='Name of the data set to use')
-    parser.add_argument('--data_dir', type=str, default='./', help='directory to the data (without the data folder)')
-    #parser.add_argument('--initial_frame', type=int, default=5, help='Minimum number of frames to use')
-    #parser.add_argument('--steps', type=int, default=400, help='Number of time frames to compute the entropy for')
-    parser.add_argument('--n_shuffles', type=int, default=100, help='Number of random shuffles')
-    #parser.add_argument('--n_inits', type=int, default=20, help='Number of starting conditions')
-    parser.add_argument('--window_size', type=int, default=10, help='Non-overlapping sliding window width')
-    parser.add_argument('--animal_name', type=str, default='Krebs', help='Name of animal to load')
-    # parser.add_argument('--seed', type=int, default=0, help='initialization seed for random selection of start frames')
-    parser.add_argument('--dt', type=int, default=1, help='Time steps between data points to avoid spill-over')
-    parser.add_argument('--roi', type=str, default='', help='Which brain region to use')
-    parser.add_argument('--EO', type=str, default='after', help='before or after eye opening')
-    parser.add_argument('--condition', type=str, default='awake', help='awake or anesth animal')
-    parser.add_argument('--FDiff', type=int, default=0, help='First difference (1) or not (0)')
-    
-    args = parser.parse_args()
-    print(args)
-
-    X, d, save_name = load_data(args, 'Curvature')
-
-    if type(X) == type([]):
-        curvatures, curvatures_shuffled = [], []
-        for i, x in enumerate(X):
-            if i == 0:
-                print('x.shape', x.shape)
-            if i % 100 == 0:
-                print(i, end=',')
-            c, c_shuffled = calc_curvature_full(x, args.dt, args.n_shuffles)
-            curvatures.append(c); curvatures_shuffled.append(c_shuffled)
-    else:
-        print('X.shape', X.shape)
-        curvatures, curvatures_shuffled = calc_curvature_full(X, args.dt, args.n_shuffles)
-    
-    if not all(c.shape == curvatures[0].shape for c in curvatures):
-        for c, (curv, curv_shuffled) in enumerate(zip(curvatures,curvatures_shuffled)):
-            d[str(c)] = {'curvatures': curv, 'curvatures_shuffled': curv_shuffled}
-    else:
-        d['curvatures'] = curvatures
-        d['curvatures_shuffled'] = curvatures_shuffled
-
-    np.savez_compressed(save_name, **d)
