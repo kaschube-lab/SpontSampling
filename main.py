@@ -29,7 +29,7 @@ def main(args):
                         # Intermediate save, as the computation takes long and in case of a 
                         # program failure and to analyze intermediate results
                         np.savez_compressed(save_path, **d_results)
-            elif function.lower() == 'pr':
+            elif function.lower() == 'dimensionality':
                 for j in range(args.n_inits):
                     print(j, end=': ', flush=True)
                     calc_dimensionality_increasing_frames(x, d_results[f'sample_{i}'], args)
