@@ -114,7 +114,7 @@ def calc_curvature_incrasing(X, initial_frame, steps, num_shuffles=0, n_inits=0,
 
 
 def calc_curvature_full(x, d_results_sample, args):
-    n_neurons, n_timeframes = X.shape
+    n_neurons, n_timeframes = x.shape
     n_frames_dt = n_timeframes // args.dt
 
     x = x[:, :int(n_frames_dt*args.dt)]

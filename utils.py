@@ -74,8 +74,8 @@ def update_res_dict(d_results, X, function, args):
     Returns: 
     -   d_results (dict): results dictionary
     """
-    if function.lower() == 'entropy':
-        for i, x in enumerate(X):
+    for i, x in enumerate(X):
+        if function.lower() == 'entropy':
             n_neurons, _ = x.shape
             shape_real = (args.n_inits, n_neurons, args.steps)
             shape_random = (args.n_shuffles, args.n_inits, n_neurons, args.steps)
@@ -97,8 +97,7 @@ def update_res_dict(d_results, X, function, args):
                 'fisher_information_random': np.empty(shape_random),
                 })
     
-    if function.lower() == 'curvatures':
-        for i, x in enumerate(X):
+        if function.lower() == 'curvatures':
             n_neurons, n_timeframes = x.shape
             n_frames_dt = n_timeframes // args.dt
             shape_real = (args.dt, n_frames_dt - 2)
@@ -108,17 +107,27 @@ def update_res_dict(d_results, X, function, args):
                 'curvatures_random': np.empty(shape_random)
                 })
     
-    if function.lower() == 'pr':
-        shape_real = (args.n_inits, args.steps)
-        shape_random = (args.n_shuffles, args.n_inits, args.steps)
-        for i, x in enumerate(X):
+        if function.lower() == 'pr':
+            shape_real = (args.n_inits, args.steps)
+            shape_random = (args.n_shuffles, args.n_inits, args.steps)
             d_results[f'sample_{i}'].update({
                 'pr': np.empty(shape_real),
                 'pr_random': np.empty(shape_random)
                 })
+    
+        if function.lower() == 'nn':
+            _, n_timeframes = x.shape
+            shape_real = (args.n_inits, n_timeframes, n_timeframes)
+            shape_random = (args.n_shuffles, args.n_inits, n_timeframes, n_timeframes)
+            d_results[f'sample_{i}'].update({
+                'NN': np.empty(shape_real),
+                'NN_random': np.empty(shape_random), 
+                'Cosine_similarity': np.empty(shape_real),
+                'Cosine_similarity_random': np.empty(shape_random)
+                })
 
 
-def get_save_path(args):
+def get_save_path(args):def get_save_path(args):
     """
     Generates the path and file name under which the results should be saved
     Parameters:
