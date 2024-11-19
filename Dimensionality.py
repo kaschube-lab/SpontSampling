@@ -43,7 +43,7 @@ def calc_dimensionality_increasing_frames(X, d_results, j, args):
         # Calculate dimensionality for the current frame count
         if args.dim_type == 'pr':
             dim = calc_pr(x)
-        d_results[f'{args.dim_type}'][j, step] = dim
+        d_results_sample[f'{args.dim_type}'][j, step] = dim
         
     for shuffle_i in range(args.n_shuffles):
         X_shuffled = np.apply_along_axis(np.random.permutation, 1, X_subset)
@@ -52,4 +52,4 @@ def calc_dimensionality_increasing_frames(X, d_results, j, args):
             x = X_shuffled[:, start_frame:start_frame+frame_count]
             if args.dim_type == 'pr': 
                 dim = calc_pr(x)
-            d_results[f'{args.dim_type}_random'][shuffle_i, j, step] = dim
+            d_results_sample[f'{args.dim_type}_random'][shuffle_i, j, step] = dim
