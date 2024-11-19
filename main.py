@@ -2,6 +2,7 @@ from utils import get_args, init_results_dict, update_res_dict, get_save_path
 from Curvature import calc_curvature_full
 from Dimensionality import calc_dimensionality_increasing_frames
 from Entropy import calc_entropy_measures_increasing_frames
+from kNN import calc_kNN
 
 def main(args):
     X, area_labels, locations = load_data(args)
@@ -19,23 +20,20 @@ def main(args):
                 print('x.shape', x.shape, end=': ')
             if i % 100 == 0:
                 print(sample_i, end=',')
+
             if function.lower() == 'curvature':
                 calc_curvature_full(x, d_results[f'sample_{i}'], args)
-            elif function.lower() == 'entropy':
+            elif function.lower() in ['entropy', 'dimensionality', 'nn']:
                 for j in range(args.n_inits):
                     print(j, end=': ', flush=True)
-                    calc_entropy_measures_increasing_frames(x, d_results[f'sample_{i}'], args)
+                    if function.lower() == 'entropy':
+                        calc_entropy_measures_increasing_frames(x, d_results[f'sample_{i}'], j, args)
+                    elif function.lower() == 'dimensionality':
+                        calc_dimensionality_increasing_frames(x, d_results[f'sample_{i}'], j, args)
+                    elif function.lower() == 'nn':
+                        calc_kNN(x, d_results[f'sample_{i}'], j, args)
+                    # Intermediate save, as the computation takes long, also in case of a program failure 
                     if j % 5 == 0:
-                        # Intermediate save, as the computation takes long and in case of a 
-                        # program failure and to analyze intermediate results
-                        np.savez_compressed(save_path, **d_results)
-            elif function.lower() == 'dimensionality':
-                for j in range(args.n_inits):
-                    print(j, end=': ', flush=True)
-                    calc_dimensionality_increasing_frames(x, d_results[f'sample_{i}'], args)
-                    if j % 5 == 0:
-                        # Intermediate save, as the computation takes long and in case of a 
-                        # program failure and to analyze intermediate results
                         np.savez_compressed(save_path, **d_results)
             
             # Save after each trial/sample/probe
