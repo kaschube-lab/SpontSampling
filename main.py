@@ -22,7 +22,7 @@ def main(args):
             if i == 0:
                 print('x.shape', x.shape, end=': ')
             if i % 100 == 0:
-                print(sample_i, end=',')
+                print(i, end=',')
 
             if function.lower() == 'curvature':
                 calc_curvature_full(x, d_results[f'sample_{i}'], args)
