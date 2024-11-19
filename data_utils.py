@@ -16,19 +16,19 @@ def get_roi(scale=4):
 
 
 
-def load_smaller_fov(data_path, size):
-    activity, roi = load_data(data_path)
-    roi_indices = np.where(roi)
-    max_x, min_x = np.max(roi_indices[0]), np.min(roi_indices[0])
-    max_y, min_y = np.max(roi_indices[1]), np.min(roi_indices[1])
-    center_x = (max_x - min_x) // 2 + min_x
-    center_y = (max_y - min_y) // 2 + min_y
-    square = [np.arange(center_x - size // 2, center_x + size // 2), np.arange(center_y - size // 2, center_y + size // 2)] 
-    act_roi = roi.copy()
-    act_roi[np.where(roi)] = activity
-    act_square = act_roi[square[0]][:, square[1]]
-    assert act_square.shape == (size, size)
-    return act_square.ravel()
+# def load_smaller_fov(data_path, size):
+#     activity, roi = load_ferret_data(data_path)
+#     roi_indices = np.where(roi)
+#     max_x, min_x = np.max(roi_indices[0]), np.min(roi_indices[0])
+#     max_y, min_y = np.max(roi_indices[1]), np.min(roi_indices[1])
+#     center_x = (max_x - min_x) // 2 + min_x
+#     center_y = (max_y - min_y) // 2 + min_y
+#     square = [np.arange(center_x - size // 2, center_x + size // 2), np.arange(center_y - size // 2, center_y + size // 2)] 
+#     act_roi = roi.copy()
+#     act_roi[np.where(roi)] = activity
+#     act_square = act_roi[square[0]][:, square[1]]
+#     assert act_square.shape == (size, size)
+#     return act_square.ravel()
     
 
 def load_ferret_data(data_dir='./', EO='before', condition='awake', fDiff=False):
