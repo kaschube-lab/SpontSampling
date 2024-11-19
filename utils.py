@@ -31,6 +31,7 @@ def get_args():
     
     args = parser.parse_args()
     print(args)
+    return args
 
 
 def init_results_dict(n_samples, area_labels, locations, args):
