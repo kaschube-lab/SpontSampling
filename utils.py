@@ -43,7 +43,7 @@ def init_results_dict(n_samples, area_labels, locations, args):
     -   locations (list, default None): list or np.array with the indices of the area at each location
     -   args (argparse object): arguments
     """
-    d_results = {f'sample_{i}': {} for i in n_samples}
+    d_results = {f'sample_{i}': {} for i in range(n_samples)}
     d_results.update({'meta_data': {'data_set': args.data_set, 'n_shuffles': args.n_shuffles,
                                     'dt': args.dt, 'n_samples': n_samples}})
     if args.roi:
