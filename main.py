@@ -5,6 +5,8 @@ from Dimensionality import calc_dimensionality_increasing_frames
 from Entropy import calc_entropy_measures_increasing_frames
 from kNN import calc_kNN
 
+import numpy as np
+
 def main(args):
     X, area_labels, locations = load_data(args)
     d_results = init_results_dict(len(X), area_labels, locations, args)
