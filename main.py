@@ -1,4 +1,5 @@
 from utils import get_args, init_results_dict, update_res_dict, get_save_path
+from data_utils import load_data
 from Curvature import calc_curvature_full
 from Dimensionality import calc_dimensionality_increasing_frames
 from Entropy import calc_entropy_measures_increasing_frames
