@@ -117,9 +117,8 @@ def update_res_dict(d_results, X, function, args):
                 })
     
         if function.lower() == 'nn':
-            _, n_timeframes = x.shape
-            shape_real = (args.n_inits, n_timeframes, n_timeframes)
-            shape_random = (args.n_shuffles, args.n_inits, n_timeframes, n_timeframes)
+            shape_real = (args.n_inits, args.steps, args.steps)
+            shape_random = (args.n_shuffles, args.n_inits, args.steps, args.steps)
             d_results[f'sample_{i}'].update({
                 'NN': np.empty(shape_real),
                 'NN_random': np.empty(shape_random), 

@@ -38,13 +38,13 @@ def get_nearest_neighbours(x_norm):
     return nn, cosine_similarities
 
 
-def calc_kNN(X, d_results, j, args):
+def calc_kNN(x, d_results, j, args):
     """
     Compute the k-nearest neighbours of each time frame to all previous time frames. As a distance matrix
     we use the cosine similarity. 
 
     Parameters:
-    - X (np.ndarray): The input data matrix with shape (n_neurons, n_timeframes).
+    - x (np.ndarray): The input data matrix with shape (n_neurons, n_timeframes).
     - d_results (dict): results dictionalry
     - j (int): current iteration index
     - args (argparse object): program arguments
@@ -55,14 +55,14 @@ def calc_kNN(X, d_results, j, args):
     n_neurons, n_timeframes = x.shape
     
     start_frame = np.random.randint(n_timeframes // args.dt - (args.steps + args.min_frames))
-    X_subset = x[:, start_frame::args.dt]
+    X_subset = x[:, start_frame::args.dt][:, :args.steps]
 
 
     # Normalize the matrix along the neurons dimension
     X_subset = X_subset / np.linalg.norm(X_subset, axis=0, keepdims=True)
 
     # Compute the neighbourhood order and cosine similarity for each time frame    
-    nn, cosine_similarity = get_nearest_neighbours(X_shuffled)
+    nn, cosine_similarity = get_nearest_neighbours(X_subset)
     d_results[f'NN'][j] = nn
     d_results[f'Cosine_similarity'][j] = cosine_similarity
 
