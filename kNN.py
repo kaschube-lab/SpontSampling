@@ -19,22 +19,23 @@ def get_cosine_save_path(args):
     return save_path
 
 
-def calc_cosine_similarity(x_norm):
+def get_nearest_neighbours(x_norm):
     """
-    Compute the cosine similarity between each time point and all previous time points.
+    Compute the nearest neightbours and cosine similarity between each time point and all previous time points.
     Parameters:
     - x_norm (np.array): normalized input matrix of shape (n_neurons, n_timeframes).
     
     Returns:
+    - nn (np.array): ordering of previous time points by cosine similarity of shape (n_timeframes, n_timeframes)
     - cosine_similarities (np.array): cos sims of shape (n_timeframes, n_timeframes)
     """
     _ , n_timeframes = x_norm.shape
-    cosine_similarities, nn = np.zeros((n_timeframes, n_timeframes)), np.zeros((n_timeframes, n_timeframes))
+    nn, cosine_similarities = np.zeros((n_timeframes, n_timeframes)), np.zeros((n_timeframes, n_timeframes))
     for t in range(1, n_timeframes):
         cos = np.dot(x_norm[:, t].reshape(-1), x_norm[:, :t])
         cosine_similarities[t, :t] = cos
         nn[t, :t] = np.argsort(cos)
-    return cosine_similarities
+    return nn, cosine_similarities
 
 
 def calc_kNN(X, d_results, j, args):
@@ -49,7 +50,7 @@ def calc_kNN(X, d_results, j, args):
     - args (argparse object): program arguments
 
     Returns:
-    - ToDo XXX
+    - None
     """
     n_neurons, n_timeframes = x.shape
     
@@ -59,14 +60,16 @@ def calc_kNN(X, d_results, j, args):
 
     # Normalize the matrix along the neurons dimension
     X_subset = X_subset / np.linalg.norm(X_subset, axis=0, keepdims=True)
-    n_timeframes = X_subset.shape[-1]
-    
-    cosine_similarity = calc_cosine_similarity(X_shuffled)
-    nn = get_nearest_neighbours(cosine_similarity)
 
+    # Compute the neighbourhood order and cosine similarity for each time frame    
+    nn, cosine_similarity = get_nearest_neighbours(X_shuffled)
+    d_results[f'NN'][j] = nn
+    d_results[f'Cosine_similarity'][j] = cosine_similarity
 
     for shuffle_i in range(args.n_shuffles):
         X_shuffled = np.apply_along_axis(np.random.permutation, 1, X_subset)
-        nn, cosine_similarity = calc_cosine_similarity(X_shuffled)
-        nn = get_nearest_neighbours(cosine_similarity)
+        nn, cosine_similarity = get_nearest_neighbours(X_shuffled)
+        d_results[f'NN_random'][j] = nn
+        d_results[f'Cosine_similarity_random'][shuffle_i, j] = cosine_similarity
+
     
