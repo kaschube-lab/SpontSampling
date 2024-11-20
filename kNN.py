@@ -19,7 +19,7 @@ def get_cosine_save_path(args):
     return save_path
 
 
-def get_nearest_neighbours(x_norm):
+def get_nearest_neighbours(x_norm, args):
     """
     Compute the nearest neightbours and cosine similarity between each time point and all previous time points.
     Parameters:
@@ -34,7 +34,8 @@ def get_nearest_neighbours(x_norm):
     for t in range(1, n_timeframes):
         cos = np.dot(x_norm[:, t].reshape(-1), x_norm[:, :t])
         cosine_similarities[t, :t] = cos
-        nn[t, :t] = np.argsort(cos)
+        if t >= args.min_frames:
+            nn[t-args.min_frames] = np.argsort(cos[-args.min_frames:])
     return nn, cosine_similarities
 
 
@@ -54,12 +55,15 @@ def calc_kNN(x, d_results, j, args):
     """
     n_neurons, n_timeframes = x.shape
     
-    start_frame = np.random.randint(n_timeframes // args.dt - (args.steps + args.min_frames))
-    X_subset = x[:, start_frame::args.dt][:, :args.steps]
+    #start_frame = np.random.randint(n_timeframes // args.dt - (args.steps + args.min_frames))
+    x = x[:, j::args.dt]
 
+    norm = np.linalg.norm(x, axis=0, keepdims=True)
+    norm = np.where(norm < args.knn_epsilon, 0, norm)
 
     # Normalize the matrix along the neurons dimension
-    X_subset = X_subset / np.linalg.norm(X_subset, axis=0, keepdims=True)
+    x = x / norm
+    x[np.isnan(x)] = np.inf
 
     # Compute the neighbourhood order and cosine similarity for each time frame    
     nn, cosine_similarity = get_nearest_neighbours(X_subset)
@@ -69,7 +73,7 @@ def calc_kNN(x, d_results, j, args):
     for shuffle_i in range(args.n_shuffles):
         X_shuffled = np.apply_along_axis(np.random.permutation, 1, X_subset)
         nn, cosine_similarity = get_nearest_neighbours(X_shuffled)
-        d_results[f'NN_random'][j] = nn
+        d_results[f'NN_random'][shuffle_i, j] = nn
         d_results[f'Cosine_similarity_random'][shuffle_i, j] = cosine_similarity
 
     

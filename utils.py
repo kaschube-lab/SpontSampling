@@ -28,6 +28,7 @@ def get_args():
     parser.add_argument('--condition', type=str, default='awake', help='awake or anesth animal')
     parser.add_argument('--FDiff', type=int, default=0, help='First difference (1) or not (0)')
     parser.add_argument('--dim_type', type=str, default='pr', help='Type of dimensionality measure (pr, etc.)')
+    parser.add_argument('--knn_epsilon', type=float, default=0, help='How large the norm has to be of the data to be included')
     
     args = parser.parse_args()
     print(args)
@@ -45,7 +46,9 @@ def init_results_dict(n_samples, area_labels, locations, args):
     """
     d_results = {f'sample_{i}': {} for i in range(n_samples)}
     d_results.update({'meta_data': {'data_set': args.data_set, 'n_shuffles': args.n_shuffles,
-                                    'dt': args.dt, 'n_samples': n_samples}})
+                                    'dt': args.dt, 'n_samples': n_samples, 'min_frames': args.min_frames,
+                                    'steps': args.steps, 'knn_epsilon': args.knn_epsilon}
+                                    })
     if args.roi:
             d_results['meta_data']['roi'] = args.roi
     if args.data_set.lower() == 'stringer':
@@ -117,8 +120,10 @@ def update_res_dict(d_results, X, function, args):
                 })
     
         if function.lower() == 'nn':
-            shape_real = (args.n_inits, args.steps, args.steps)
-            shape_random = (args.n_shuffles, args.n_inits, args.steps, args.steps)
+            n_neurons, n_timeframes = x.shape
+            n_frames_dt = n_timeframes // args.dt
+            shape_real = (args.dt, n_frames_dt - args.min_frames, args.min_frames)
+            shape_random = (args.n_shuffles, args.dt, n_frames_dt - args.min_frames, args.min_frames)
             d_results[f'sample_{i}'].update({
                 'NN': np.empty(shape_real),
                 'NN_random': np.empty(shape_random), 
