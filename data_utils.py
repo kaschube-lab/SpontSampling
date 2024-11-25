@@ -3,6 +3,43 @@ import numpy as np
 import scipy.io as sio
 from skimage.transform import resize
 
+##### ----------------- Allen Institute Movies ----------------- ######
+
+def load_allen_movie_Data(data_dir='./', movie=1):
+    if movie == 1:
+        parent_folder = os.path.join(data_dir, "AllenInstitute_Movies/output/NM1/VISp/three_session_A/")
+    elif movie == 3:
+        parent_folder = os.path.join(data_dir, "AllenInstitute_Movies/output/NM3/VISp/three_session_A/")
+
+    structured_data = []
+
+    # Get all subfolders in the parent folder
+    for subfolder_name in os.listdir(parent_folder):
+        subfolder_path = os.path.join(parent_folder, subfolder_name)
+
+        # Ensure it's a directory
+        if os.path.isdir(subfolder_path):
+            subfolder_data = {"subfolder": subfolder_name, "files": []}
+
+            # List all CSV files in the subfolder
+            for file_name in os.listdir(subfolder_path):
+                if file_name.endswith(".csv") and file_name != "metadata.csv":
+                    file_path = os.path.join(subfolder_path, file_name)
+
+                    # Load the CSV file into a DataFrame
+                    try:
+                        data = np.genfromtxt(file_path, delimiter=',').T
+                        subfolder_data["files"].append({"file_name": file_name, "data": data})
+                    except Exception as e:
+                        print(f"Error reading {file_path}: {e}")
+
+            structured_data.append(subfolder_data)
+
+    return structured_data
+
+
+
+
 ##### ----------------- FERRET ----------------- ######
 
 
