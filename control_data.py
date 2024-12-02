@@ -21,7 +21,7 @@ def create_gauss(X, n_samples):
     covariance = np.cov(X)
 
     # Create a multivariate normal distribution object
-    mvn = multivariate_normal(mean=mean, cov=covariance)
+    mvn = multivariate_normal(mean=mean, cov=covariance, allow_singular=True)
 
     Y = mvn.rvs(size=n_samples).T  # Transpose to match (number_pixels, n_samples)
 

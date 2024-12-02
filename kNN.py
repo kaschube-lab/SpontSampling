@@ -76,4 +76,47 @@ def calc_kNN(x, d_results, j, args):
         d_results[f'NN_random'][shuffle_i, j] = nn
         d_results[f'Cosine_similarity_random'][shuffle_i, j] = cosine_similarity
 
-    
+    def compute_avg_min_cosine_distances(data, timeframe, k):
+        """
+        Compute the average minimal cosine distance to the nearest k patterns
+        for each pattern to preceding and following patterns within a timeframe.
+
+        Args:
+            data (np.ndarray): Array of shape (n_timepoints, n_pixels).
+            timeframe (int): The number of timepoints to consider before and after.
+            k (int): Number of nearest patterns to average.
+
+        Returns:
+            tuple: Two arrays of shape (n_timepoints,) containing the average minimal cosine
+                   distances to preceding and following patterns for each timepoint.
+        """
+        n_timepoints, _ = data.shape
+
+        # Initialize arrays to store average minimal distances
+        avg_min_dist_to_preceding = np.full(n_timepoints, np.inf)
+        avg_min_dist_to_following = np.full(n_timepoints, np.inf)
+
+        for t in range(n_timepoints):
+            # Compute distances to preceding patterns within the timeframe
+            preceding_distances = []
+            for tp in range(max(0, t - timeframe), t):
+                distance = cosine(data[t], data[tp])
+                preceding_distances.append(distance)
+
+            # Take the average of the smallest k distances
+            if preceding_distances:
+                k_smallest_preceding = nsmallest(k, preceding_distances)
+                avg_min_dist_to_preceding[t] = np.mean(k_smallest_preceding)
+
+            # Compute distances to following patterns within the timeframe
+            following_distances = []
+            for tf in range(t + 1, min(n_timepoints, t + timeframe + 1)):
+                distance = cosine(data[t], data[tf])
+                following_distances.append(distance)
+
+            # Take the average of the smallest k distances
+            if following_distances:
+                k_smallest_following = nsmallest(k, following_distances)
+                avg_min_dist_to_following[t] = np.mean(k_smallest_following)
+
+        return avg_min_dist_to_preceding, avg_min_dist_to_following
