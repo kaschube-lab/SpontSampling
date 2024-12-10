@@ -46,6 +46,7 @@ def init_results_dict(n_samples, area_labels, locations, args):
     -   locations (list, default None): list or np.array with the indices of the area at each location
     -   args (argparse object): arguments
     """
+    print('Initialize results dictionary')
     d_results = {f'sample_{i}': {} for i in range(n_samples)}
     d_results.update({'meta_data': {'data_set': args.data_set, 'n_shuffles': args.n_shuffles,
                                     'dt': args.dt, 'n_samples': n_samples, 'min_frames': args.min_frames,
@@ -80,6 +81,7 @@ def update_res_dict(d_results, X, function, args):
     Returns: 
     -   d_results (dict): results dictionary
     """
+    print('Update results dictionary for function')
     for i, x in enumerate(X):
         if function.lower() == 'entropy':
             n_neurons, _ = x.shape
@@ -147,7 +149,7 @@ def get_save_path(args):
     Returns: 
     -   save_path (str): Path (incl. dir and file name) for storing the results
     """
-    
+    print('Generate save path')
     res_dir = os.path.join(args.save_dir, 'results', args.function)
     if args.function.lower() == 'knn':
         res_dir = os.path.join(res_dir, f'k{args.k}_window_{args.window_size}_epsilon_{args.knn_epsilon}')
