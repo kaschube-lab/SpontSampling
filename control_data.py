@@ -23,8 +23,8 @@ def create_gauss(X):
     mvn = multivariate_normal(mean=mean, cov=covariance, allow_singular=True)
 
     Y = mvn.rvs(size=n_timeframes).T  # Transpose to match (n_pixels, n_timeframes)
-    return [Y]
-
+    return Y
+    
 
 def load_movie(data_dir='./', movie=1):
     # Potential ToDo: Load all movies into the list
