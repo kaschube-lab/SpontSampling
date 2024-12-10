@@ -129,8 +129,10 @@ def update_res_dict(d_results, X, function, args):
             d_results[f'sample_{i}'].update({
                 'avg_min_dist_to_preceding': np.empty(shape_real),
                 'avg_min_dist_to_preceding_random': np.empty(shape_random),
+                'avg_min_dist_to_preceding_gauss': np.empty(shape_real),
                 'avg_min_dist_to_following': np.empty(shape_real),
-                'avg_min_dist_to_following_random': np.empty(shape_random)
+                'avg_min_dist_to_following_random': np.empty(shape_random),
+                'avg_min_dist_to_following_gauss': np.empty(shape_real)
                 })
             d_results['meta_data']['k'] = args.k
             d_results['meta_data']['window_size'] = args.window_size
