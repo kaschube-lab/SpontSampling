@@ -6,6 +6,7 @@ from Entropy import calc_entropy_measures_increasing_frames
 from kNN import calc_kNN
 
 import numpy as np
+import pickle
 
 def main(args):
     X, area_labels, locations = load_data(args)
@@ -22,26 +23,32 @@ def main(args):
             if i == 0:
                 print('x.shape', x.shape, end=': ')
             if i % 100 == 0:
-                print(sample_i, end=',')
+                print(i, end=',')
 
             if function.lower() == 'curvature':
                 calc_curvature_full(x, d_results[f'sample_{i}'], args)
-            elif function.lower() in ['entropy', 'dimensionality', 'nn']:
+            elif function.lower() == 'nn':
+                for j in range(args.dt):
+                    calc_kNN(x, d_results[f'sample_{i}'], j, args)
+            elif function.lower() in ['entropy', 'dimensionality']:
                 for j in range(args.n_inits):
                     print(j, end=': ', flush=True)
                     if function.lower() == 'entropy':
                         calc_entropy_measures_increasing_frames(x, d_results[f'sample_{i}'], j, args)
                     elif function.lower() == 'dimensionality':
                         calc_dimensionality_increasing_frames(x, d_results[f'sample_{i}'], j, args)
-                    elif function.lower() == 'nn':
-                        calc_kNN(x, d_results[f'sample_{i}'], j, args)
                     # Intermediate save, as the computation takes long, also in case of a program failure 
                     if j % 5 == 0:
                         np.savez_compressed(save_path, **d_results)
             
             # Save after each trial/sample/probe
-            np.savez_compressed(save_path, **d_results)
-
+            try:
+                np.savez_compressed(save_path, **d_results)
+            except OverflowError:
+                save_path = save_path.split('.npz')[0] + 'pkl'
+                with open(save_path, 'wb') as f:
+   ...:             pickle.dump(d_results, f, protocol=4)
+            print('')
 
 if __name__ == '__main__':
 
