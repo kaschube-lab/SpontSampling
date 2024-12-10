@@ -155,7 +155,7 @@ def get_save_path(args):
         res_dir = os.path.join(res_dir, f'k{args.k}_window_{args.window_size}_epsilon_{args.knn_epsilon}')
     os.makedirs(res_dir, exist_ok=True)
 
-    save_name = f'{function}_{args.data_set}_{args.dt}dt'
+    save_name = f'{args.function}_{args.data_set}_{args.dt}dt'
     if args.data_set.lower() == 'stringer':
         save_name += f'_{args.animal_name}_{args.window_size}windowsize'
     elif args.data_set.lower() == 'ferret':
