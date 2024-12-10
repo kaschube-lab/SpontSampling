@@ -35,7 +35,13 @@ def load_allen_movie_Data(data_dir='./', movie=1):
 
             structured_data.append(subfolder_data)
 
-    return structured_data
+    reformatted_list = []
+
+    for i in range(len(structured_data)):
+        for j in range(len(structured_data[i]['files'])):
+            reformatted_list.append(load_data[i]['files'][j]['data'].T)
+
+    return reformatted_list
 
 
 
