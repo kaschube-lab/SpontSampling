@@ -150,7 +150,7 @@ def get_save_path(args):
     
     res_dir = os.path.join(args.save_dir, 'results', args.function)
     if args.function.lower() == 'knn':
-        res_dir os.path.join(res_dir, f'k{args.k}_window_{args.window_size}_epsilon_{args.knn_epsilon}')
+        res_dir = os.path.join(res_dir, f'k{args.k}_window_{args.window_size}_epsilon_{args.knn_epsilon}')
     os.makedirs(res_dir, exist_ok=True)
 
     save_name = f'{function}_{args.data_set}_{args.dt}dt'

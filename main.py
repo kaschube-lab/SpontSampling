@@ -47,7 +47,7 @@ def main(args):
         except OverflowError:
             save_path = save_path.split('.npz')[0] + 'pkl'
             with open(save_path, 'wb') as f:
-...:             pickle.dump(d_results, f, protocol=4)
+                pickle.dump(d_results, f, protocol=4)
         print('')
 
 if __name__ == '__main__':
