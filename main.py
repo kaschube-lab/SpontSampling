@@ -33,7 +33,7 @@ def main(args):
                 if args.function.lower() == 'knn':
                     calc_avrg_knn(x, d_results[f'sample_{i}'], j, args)
                 elif args.function.lower() == 'fisher_separability':
-                    calc_fisher_separability(x, d_results_sample, j, args)
+                    calc_fisher_separability(x, d_results[f'sample_{i}'], j, args)
         elif args.function.lower() in ['entropy', 'dimensionality']:
             for j in range(args.n_inits):
                 print(j, end=': ', flush=True)
