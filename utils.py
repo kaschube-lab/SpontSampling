@@ -125,10 +125,10 @@ def update_res_dict(d_results, X, function, args):
             shape_real = (args.dt, n_frames_dt - args.min_frames, args.min_frames)
             shape_random = (args.n_shuffles, args.dt, n_frames_dt - args.min_frames, args.min_frames)
             d_results[f'sample_{i}'].update({
-                'NN': np.empty(shape_real),
-                'NN_random': np.empty(shape_random), 
-                'Cosine_similarity': np.empty(shape_real),
-                'Cosine_similarity_random': np.empty(shape_random)
+                'NN': np.empty((args.dt, n_frames_dt - args.min_frames, args.min_frames)),
+                'NN_random': np.empty((args.n_shuffles, args.dt, n_frames_dt - args.min_frames, args.min_frames)), 
+                'Cosine_similarity': np.empty((args.dt, n_frames_dt, n_frames_dt)),
+                'Cosine_similarity_random': np.empty((args.n_shuffles, args.dt, n_frames_dt, n_frames_dt))
                 })
 
 

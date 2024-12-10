@@ -6,6 +6,7 @@ from Entropy import calc_entropy_measures_increasing_frames
 from kNN import calc_kNN
 
 import numpy as np
+import pickle
 
 def main(args):
     X, area_labels, locations = load_data(args)
@@ -41,7 +42,12 @@ def main(args):
                         np.savez_compressed(save_path, **d_results)
             
             # Save after each trial/sample/probe
-            np.savez_compressed(save_path, **d_results)
+            try:
+                np.savez_compressed(save_path, **d_results)
+            except OverflowError:
+                save_path = save_path.split('.npz')[0] + 'pkl'
+                with open(save_path, 'wb') as f:
+   ...:             pickle.dump(d_results, f, protocol=4)
             print('')
 
 if __name__ == '__main__':

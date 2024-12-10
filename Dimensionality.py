@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.decomposition import PCA
+from skdim.id import CorrInt, DANCo, ESS, FisherS, lPCA, KNN, MADA, MLE, MOM, TLE, TwoNN
 
 
 def calc_pr(X):
@@ -18,6 +19,33 @@ def calc_pr(X):
     eigenvalues = pca.explained_variance_
     pr = np.sum(eigenvalues) ** 2 / np.sum(eigenvalues**2)
     return pr
+
+def calc_Idim(X, dim_type):
+    if dim_type.lower() == 'corrint':
+        dim_func = CorrInt()
+    elif dim_type.lower() == 'danco':
+        dim_func = DANCo()
+    elif dim_type.lower() == 'ess':
+        dim_func = ESS()
+    elif dim_type.lower() == 'fishers':
+        dim_func = FisherS()
+    elif dim_type.lower() == 'lpca':
+        dim_func = lPCA()
+    elif dim_type.lower() == 'knn':
+        dim_func = KNN()
+    elif dim_type.lower() == 'mada':
+        dim_func = MADA()
+    elif dim_type.lower() == 'mle':
+        dim_func = MLE()
+    elif dim_type.lower() == 'mom':
+        dim_func = MOM()
+    elif dim_type.lower() == 'tle':
+        dim_func = TLE()
+    elif dim_type.lower() == 'twonn':
+        dim_func = TwoNN()
+
+
+
 
 
 def calc_dimensionality_increasing_frames(X, d_results, j, args):
