@@ -55,8 +55,9 @@ def compute_avg_min_cosine_distances(x, d_results_sample, args):
     if args.k > args.max_tfs: 
         raise ValueError ('k nearest frames have to be smaller or equal to the number of time frames to consider (max_tfs)')
 
-    
+
     norm = np.linalg.norm(x, axis=0, keepdims=True)
+    # Set everything to 0 that has a norm smaller than epsilon to control for the zero activity vectors.
     norm = np.where(norm < args.knn_epsilon, 0, norm)
 
     # Normalize the matrix along the neurons dimension
