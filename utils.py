@@ -10,7 +10,7 @@ def get_args():
     parser = argparse.ArgumentParser(
                     prog='SpontSampling',
                     description='Computes the different metrics to assess the dynamics of spont activity')
-    parser.add_argument('--functions', type=str, default='Entropy', help='Name of the function to compute. If wanting to compute several functions they need to be separated by ;')
+    parser.add_argument('--function', type=str, default='Entropy', help='Name of the function to compute.')
     parser.add_argument('-d', '--data_set', type=str, default='Stringer', help='Name of the data set to use')
     parser.add_argument('--min_frames', type=int, default=5, help='Minimum number of frames to use')
     parser.add_argument('--steps', type=int, default=400, help='Number of time frames to compute the entropy for')
@@ -19,7 +19,7 @@ def get_args():
     parser.add_argument('--n_inits', type=int, default=20, help='Number of starting conditions')
     parser.add_argument('--data_dir', type=str, default='./', help='directory to the data (without the data folder)')
     parser.add_argument('--save_dir', type=str, default='./', help='directory where to save results (without the results folder)')
-    parser.add_argument('--window_size', type=int, default=10, help='Non-overlapping sliding window width')
+    parser.add_argument('--window_size_stringer', type=int, default=10, help='Non-overlapping sliding window width for preprocessing Stringer data')
     parser.add_argument('--animal_name', type=str, default='Krebs', help='Name of animal to load')
     parser.add_argument('--seed', type=int, default=0, help='initialization seed for random selection of start frames')
     parser.add_argument('--dt', type=int, default=1, help='Time steps between data points to avoid spill-over')
@@ -29,6 +29,8 @@ def get_args():
     parser.add_argument('--FDiff', type=int, default=0, help='First difference (1) or not (0)')
     parser.add_argument('--dim_type', type=str, default='pr', help='Type of dimensionality measure (pr, etc.)')
     parser.add_argument('--knn_epsilon', type=float, default=0, help='How large the norm has to be of the data to be included')
+    parser.add_argument('--k', type=int, default=5, help='k for k nearest neighbours')
+    parser.add_argument('--window_size', type=int, default=10, help='Window width to consider time frames in.')
     
     args = parser.parse_args()
     print(args)
@@ -53,8 +55,8 @@ def init_results_dict(n_samples, area_labels, locations, args):
             d_results['meta_data']['roi'] = args.roi
     if args.data_set.lower() == 'stringer':
         d_results['meta_data']['animal_name'] = args.animal_name
-        d_results['meta_data']['window_size'] = args.window_size
-        d_results['meta_data']['HZ'] = 30 / args.window_size
+        d_results['meta_data']['window_size_stringer'] = args.window_size_stringer
+        d_results['meta_data']['HZ'] = 30 / args.window_size_stringer
     elif args.data_set.lower() == 'ferret':
         d_results['meta_data']['EO'] = args.EO
         d_results['meta_data']['condition'] = args.condition
@@ -101,7 +103,7 @@ def update_res_dict(d_results, X, function, args):
                 'fisher_information_random': np.empty(shape_random),
                 })
     
-        if function.lower() == 'curvatures':
+        elif function.lower() == 'curvatures':
             n_neurons, n_timeframes = x.shape
             n_frames_dt = n_timeframes // args.dt
             shape_real = (args.dt, n_frames_dt - 2)
@@ -111,7 +113,7 @@ def update_res_dict(d_results, X, function, args):
                 'curvatures_random': np.empty(shape_random)
                 })
     
-        if function.lower() == 'pr':
+        elif function.lower() == 'pr':
             shape_real = (args.n_inits, args.steps)
             shape_random = (args.n_shuffles, args.n_inits, args.steps)
             d_results[f'sample_{i}'].update({
@@ -119,17 +121,20 @@ def update_res_dict(d_results, X, function, args):
                 'pr_random': np.empty(shape_random)
                 })
     
-        if function.lower() == 'nn':
+        elif function.lower == 'knn':
             n_neurons, n_timeframes = x.shape
             n_frames_dt = n_timeframes // args.dt
-            shape_real = (args.dt, n_frames_dt - args.min_frames, args.min_frames)
-            shape_random = (args.n_shuffles, args.dt, n_frames_dt - args.min_frames, args.min_frames)
+            shape_real = (args.dt, n_frames_dt - args.max_tfs)
+            shape_random = (args.n_shuffles, args.dt, n_frames_dt - args.max_tfs)
             d_results[f'sample_{i}'].update({
-                'NN': np.empty((args.dt, n_frames_dt - args.min_frames, args.min_frames)),
-                'NN_random': np.empty((args.n_shuffles, args.dt, n_frames_dt - args.min_frames, args.min_frames)), 
-                'Cosine_similarity': np.empty((args.dt, n_frames_dt, n_frames_dt)),
-                'Cosine_similarity_random': np.empty((args.n_shuffles, args.dt, n_frames_dt, n_frames_dt))
+                'avg_min_dist_to_preceding': np.empty(shape_real),
+                'avg_min_dist_to_preceding_random': np.empty(shape_random),
+                'avg_min_dist_to_following': np.empty(shape_real),
+                'avg_min_dist_to_following_random': np.empty(shape_random)
                 })
+            d_results['meta_data']['k'] = args.k
+            d_results['meta_data']['window_size'] = args.window_size
+            d_results['meta_data']['knn_epsilon'] = args.knn_epsilon
 
 
 def get_save_path(args):
@@ -140,10 +145,13 @@ def get_save_path(args):
     Returns: 
     -   save_path (str): Path (incl. dir and file name) for storing the results
     """
-    functions = '_'.join(args.functions.split(';'))
-    res_dir = os.path.join(args.save_dir, 'results', functions)
+    
+    res_dir = os.path.join(args.save_dir, 'results', args.function)
+    if args.function.lower() == 'knn':
+        res_dir os.path.join(res_dir, f'k{args.k}_window_{args.window_size}_epsilon_{args.knn_epsilon}')
     os.makedirs(res_dir, exist_ok=True)
-    save_name = f'{functions}_{args.data_set}_{args.dt}dt'
+
+    save_name = f'{function}_{args.data_set}_{args.dt}dt'
     if args.data_set.lower() == 'stringer':
         save_name += f'_{args.animal_name}_{args.window_size}windowsize'
     elif args.data_set.lower() == 'ferret':
