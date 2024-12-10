@@ -5,6 +5,7 @@ from Dimensionality import calc_dimensionality_increasing_frames
 from Entropy import calc_entropy_measures_increasing_frames
 # from kNN import calc_kNN
 from CosineDistances import calc_avrg_knn
+from Fisher_Separability import calc_fisher_separability
 
 import numpy as np
 import pickle
@@ -27,9 +28,12 @@ def main(args):
 
         if args.function.lower() == 'curvature':
             calc_curvature_full(x, d_results[f'sample_{i}'], args)
-        elif args.function.lower() == 'knn':
+        elif args.function.lower() in ['knn', 'fisher_separability']:
             for j in range(args.dt):
-                calc_avrg_knn(x, d_results[f'sample_{i}'], j, args)
+                if args.function.lower() == 'knn':
+                    calc_avrg_knn(x, d_results[f'sample_{i}'], j, args)
+                elif args.function.lower() == 'fisher_separability':
+                    calc_fisher_separability(x, d_results_sample, j, args)
         elif args.function.lower() in ['entropy', 'dimensionality']:
             for j in range(args.n_inits):
                 print(j, end=': ', flush=True)

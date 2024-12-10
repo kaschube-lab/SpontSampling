@@ -139,6 +139,18 @@ def update_res_dict(d_results, X, function, args):
             d_results['meta_data']['k'] = args.k
             d_results['meta_data']['window_size'] = args.window_size
             d_results['meta_data']['knn_epsilon'] = args.knn_epsilon
+        
+        elif function.lower() == 'fisher_separability':
+            n_neurons, n_timeframes = x.shape
+            n_frames_dt = n_timeframes // args.dt
+            shape_real = (args.dt, n_frames_dt)
+            shape_random = (args.n_shuffles, args.dt, n_frames_dt)
+            d_results[f'sample_{i}'].update({
+                'fisher_separability': np.empty(shape_real),
+                'fisher_separability_random': np.empty(shape_random),
+                'fisher_separability_gauss': np.empty(shape_real)
+                })
+   
 
 
 def get_save_path(args):
