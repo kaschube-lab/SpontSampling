@@ -103,6 +103,6 @@ def calc_avrg_knn(x, d_results_sample, j, args):
 
     print('compute knn for shuffled data', flush=True)
     for shuffle_i in range(args.n_shuffles):
-        X_shuffled = np.apply_along_axis(np.random.permutation, 1, x)
-        compute_avg_min_cosine_distances(X_shuffled, d_results_sample['avg_min_dist_to_preceding_random'][shuffle_i, j], 
+        x_shuffled = np.apply_along_axis(np.random.permutation, 1, x)
+        compute_avg_min_cosine_distances(x_shuffled, d_results_sample['avg_min_dist_to_preceding_random'][shuffle_i, j], 
                                         d_results_sample['avg_min_dist_to_following_random'][shuffle_i, j], args)
