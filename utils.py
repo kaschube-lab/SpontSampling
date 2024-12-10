@@ -123,11 +123,11 @@ def update_res_dict(d_results, X, function, args):
                 'pr_random': np.empty(shape_random)
                 })
     
-        elif function.lower == 'knn':
+        elif function.lower() == 'knn':
             n_neurons, n_timeframes = x.shape
             n_frames_dt = n_timeframes // args.dt
-            shape_real = (args.dt, n_frames_dt - args.max_tfs)
-            shape_random = (args.n_shuffles, args.dt, n_frames_dt - args.max_tfs)
+            shape_real = (args.dt, n_frames_dt - args.window_size)
+            shape_random = (args.n_shuffles, args.dt, n_frames_dt - args.window_size)
             d_results[f'sample_{i}'].update({
                 'avg_min_dist_to_preceding': np.empty(shape_real),
                 'avg_min_dist_to_preceding_random': np.empty(shape_random),

@@ -53,6 +53,7 @@ def compute_avg_min_cosine_distances(x, t, avg_min_dist_to_preceding, avg_min_di
         None
 
     """
+    _, n_timeframes = x.shape
     if t >= args.window_size:
         preceding_distances = []
         for tf in range(max(0, t - args.window_size), t):
@@ -73,7 +74,7 @@ def compute_avg_min_cosine_distances(x, t, avg_min_dist_to_preceding, avg_min_di
         
         # Take the average of the smallest k distances
         if following_distances:
-            k_smallest_following = nsmallest(k, following_distances)
+            k_smallest_following = nsmallest(args.k, following_distances)
             avg_min_dist_to_following
             avg_min_dist_to_following[t] = np.mean(k_smallest_following)
 
@@ -116,14 +117,15 @@ def calc_avrg_knn(x, d_results_sample, j, args):
 
     for t in range(n_timeframes):
         # Compute distances to preceding patterns within the timeframe
-        calc_avrg_knn(x, t, d_results_sample['avg_min_dist_to_preceding'][d], 
-                    d_results_sample['avg_min_dist_to_following'][d], args)
+        compute_avg_min_cosine_distances(x, t, d_results_sample['avg_min_dist_to_preceding'][j], 
+                                        d_results_sample['avg_min_dist_to_following'][j], args)
         
-        calc_avrg_knn(x_gauss, t, d_results_sample['avg_min_dist_to_preceding_gauss'][d], 
-                    d_results_sample['avg_min_dist_to_following_gauss'][d], args)
+        compute_avg_min_cosine_distances(x_gauss, t, d_results_sample['avg_min_dist_to_preceding_gauss'][j], 
+                                         d_results_sample['avg_min_dist_to_following_gauss'][j], args)
 
 
         for shuffle_i in range(args.n_shuffles):
             X_shuffled = np.apply_along_axis(np.random.permutation, 1, x)
-            calc_avrg_knn(X_shuffled, t, d_results_sample['avg_min_dist_to_preceding_random'][shuffle_i, d], 
-                    d_results_sample['avg_min_dist_to_following_random'][shuffle_i, d], args)
+            compute_avg_min_cosine_distances(X_shuffled, t, 
+                                            d_results_sample['avg_min_dist_to_preceding_random'][shuffle_i, j], 
+                                            d_results_sample['avg_min_dist_to_following_random'][shuffle_i, j], args)
