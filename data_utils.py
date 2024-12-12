@@ -199,6 +199,7 @@ def load_stringer_data(animal_name, window_size, data_dir='./'):
     data_matrix = calc_windowed_spike_matrix(f['stall'], window_size)
     area_labels = [x[0] for x in f['areaLabels'][0]]
     print('data_matrix.shape', data_matrix.shape)
+    print(np.min(f['brainLoc']), np.max(f['brainLoc']))
     return data_matrix, area_labels, f['brainLoc']
 
 
