@@ -74,7 +74,8 @@ def calc_dimensionality_increasing_frames(X, d_results, j, args):
         d_results_sample[f'{args.dim_type}'][j, step] = dim
         
     for shuffle_i in range(args.n_shuffles):
-        X_shuffled = np.apply_along_axis(np.random.permutation, 1, X_subset)
+        X_shuffled = X_subset[:, np.random.permutation(X_subset.shape[-1])]
+        # X_shuffled = np.apply_along_axis(np.random.permutation, 1, X_subset)
         for step in range(0, args.steps, args.step_size):
             frame_count = args.min_frames + step
             x = X_shuffled[:, start_frame:start_frame+frame_count]
