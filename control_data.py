@@ -15,9 +15,10 @@ def create_gauss(X):
     """
     _, n_timeframes = X.shape
     # Compute the mean vector (average over timepoints for each variable)
-    mean = np.mean(X, axis=1)
+    mean = np.nanmean(X, axis=1)
     # Compute the covariance matrix (pairwise covariance between variables)
-    covariance = np.cov(X)
+    # Mask invalid values (nans, infs)
+    covariance = np.ma.cov(np.ma.masked_invalid(X))
 
     # Create a multivariate normal distribution object
     mvn = multivariate_normal(mean=mean, cov=covariance, allow_singular=True)
