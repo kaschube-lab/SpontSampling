@@ -52,6 +52,7 @@ def main(args):
             save_path = save_path.split('.npz')[0] + 'pkl'
             with open(save_path, 'wb') as f:
                 pickle.dump(d_results, f, protocol=4)
+        print('saved at', save_path)
         print('')
 
 if __name__ == '__main__':
