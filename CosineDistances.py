@@ -14,12 +14,12 @@ def compute_cosine_dist_matrix(x, args):
     """
     _, n_timeframes = x.shape
     cosine_dist = np.empty((n_timeframes, n_timeframes))
-    for t in range(n_timeframes):
+    for t in range(n_timeframes - args.window_size):
         for offset in range(args.window_size):
             try:
                 cosine_dist[t, t+offset] = cosine(x[:, t], x[:, t+offset])
-            except:
-                continue
+            except IndexError:
+               continue
     return cosine_dist
 
 
@@ -86,23 +86,24 @@ def calc_avrg_knn(x, d_results_sample, j, args):
 
     norm = np.linalg.norm(x, axis=0, keepdims=True)
     # Set everything to 0 that has a norm smaller than epsilon to control for the zero activity vectors.
-    norm = np.where(norm < args.knn_epsilon, 0, norm)
+    x = np.where(norm <= args.knn_epsilon, np.nan, x)
+    
+    
 
     # Normalize the matrix along the neurons dimension
-    x = x / norm
-
-    x_gauss = create_gauss(x)
+    # x = x / norm
 
     print('compute knn for normal data', flush=True)
     compute_avg_min_cosine_distances(x, d_results_sample['avg_min_dist_to_preceding'][j], 
                                         d_results_sample['avg_min_dist_to_following'][j], args)
 
     print('compute knn for Gauss', flush=True)
+    x_gauss = create_gauss(x)
     compute_avg_min_cosine_distances(x_gauss, d_results_sample['avg_min_dist_to_preceding_gauss'][j], 
                                          d_results_sample['avg_min_dist_to_following_gauss'][j], args)
 
     print('compute knn for shuffled data', flush=True)
     for shuffle_i in range(args.n_shuffles):
-        x_shuffled = np.apply_along_axis(np.random.permutation, 1, x)
+        x_shuffled = x[:, np.random.permutation(x.shape[-1])]
         compute_avg_min_cosine_distances(x_shuffled, d_results_sample['avg_min_dist_to_preceding_random'][shuffle_i, j], 
                                         d_results_sample['avg_min_dist_to_following_random'][shuffle_i, j], args)
