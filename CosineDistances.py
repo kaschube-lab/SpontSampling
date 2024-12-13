@@ -23,7 +23,7 @@ def compute_cosine_dist_matrix(x, args):
     return cosine_dist
 
 
-def compute_avg_min_cosine_distances(x, avg_min_dist_to_preceding, avg_min_dist_to_following, args):
+def compute_min_cosine_distances(x, min_dist_to_pre, min_dist_to_post, pre_tfs, post_tfs, args):
     """
     Compute the average minimal cosine distance to the nearest k patterns 
     for each pattern to preceding and following patterns within a timeframe.
@@ -31,8 +31,10 @@ def compute_avg_min_cosine_distances(x, avg_min_dist_to_preceding, avg_min_dist_
     Args:
         x (np.ndarray): Array of shape (n_pixels, n_timeframes).
         t (int): current time frame.
-        avg_min_dist_to_preceding (np.ndarray): array to store the cosine distance to all preceeding for the current time frame.
-        avg_min_dist_to_following (np.ndarray): array to store the cosine distance to all following for the current time frame.
+        min_dist_to_pre (np.ndarray): array to store the cosine distance to all preceeding for the current time frame.
+        min_dist_to_post (np.ndarray): array to store the cosine distance to all following for the current time frame.
+        pre_tfs (np.ndarray): array to store the distance in indices to all preceeding for the current time frame.
+        post_tfs (np.ndarray): array to store the distance in indices to all following for the current time frame.
         args (argparse object): program arguments
 
     Returns:
@@ -44,18 +46,27 @@ def compute_avg_min_cosine_distances(x, avg_min_dist_to_preceding, avg_min_dist_
     for t in range(n_timeframes):
         if t >= args.window_size:
             preceding_distances = cosine_dist[t-args.window_size:t, t]
+            # Sort distances
+            sorted_distances = np.argsort(preceding_distances)
+            # save distance indices
+            pre_tfs[t - args.window_size] = sorted_distances[:args.k]
             # Get the k smallest distances
-            k_smallest_preceding = nsmallest(args.k, preceding_distances)
+            k_smallest_pre = preceding_distances[sorted_distances[:args.k]] #nsmallest(args.k, preceding_distances)
             # Take the average of the smallest k distances
-            avg_min_dist_to_preceding[t - args.window_size] = np.mean(k_smallest_preceding)
+            min_dist_to_pre[t - args.window_size] = k_smallest_pre
+
 
         if t <= n_timeframes - args.window_size - 1:
             # Compute distances to following patterns within the timeframe
-            following_distances = cosine_dist[t, t+1: t+args.window_size+1]
+            post_distances = cosine_dist[t, t+1: t+args.window_size+1]
+            # Sort distances
+            sorted_distances = np.argsort(post_distances)
+            # save distance indices
+            post_tfs[t] = sorted_distances[:args.k]
             # Get the k smallest distances
-            k_smallest_following = nsmallest(args.k, following_distances)
+            k_smallest_post = post_distances[sorted_distances[:args.k]] # nsmallest(args.k, post_distances)
             # Take the average of the smallest k distances
-            avg_min_dist_to_following[t] = np.mean(k_smallest_following)
+            min_dist_to_post[t] = k_smallest_post
 
 
 
@@ -92,18 +103,24 @@ def calc_avrg_knn(x, d_results_sample, j, args):
 
     # Normalize the matrix along the neurons dimension
     # x = x / norm
-
+    # compute_min_cosine_distances(x, min_dist_to_pre, min_dist_to_post, pre_tfs, post_tfs, args)
     print('compute knn for normal data', flush=True)
-    compute_avg_min_cosine_distances(x, d_results_sample['avg_min_dist_to_preceding'][j], 
-                                        d_results_sample['avg_min_dist_to_following'][j], args)
+    compute_min_cosine_distances(x, d_results_sample['min_dist_to_pre'][j], d_results_sample['min_dist_to_post'][j],
+                                 d_results_sample['dist_index_pre'][j], d_results_sample['dist_index_post'][j], 
+                                 args)
 
     print('compute knn for Gauss', flush=True)
     x_gauss = create_gauss(x)
-    compute_avg_min_cosine_distances(x_gauss, d_results_sample['avg_min_dist_to_preceding_gauss'][j], 
-                                         d_results_sample['avg_min_dist_to_following_gauss'][j], args)
+    compute_min_cosine_distances(x_gauss, d_results_sample['min_dist_to_pre_gauss'][j], 
+                                         d_results_sample['min_dist_to_post_gauss'][j], 
+                                         d_results_sample['dist_index_pre_gauss'][j], 
+                                         d_results_sample['dist_index_post_gauss'][j],
+                                         args)
 
     print('compute knn for shuffled data', flush=True)
     for shuffle_i in range(args.n_shuffles):
         x_shuffled = x[:, np.random.permutation(x.shape[-1])]
-        compute_avg_min_cosine_distances(x_shuffled, d_results_sample['avg_min_dist_to_preceding_random'][shuffle_i, j], 
-                                        d_results_sample['avg_min_dist_to_following_random'][shuffle_i, j], args)
+        compute_min_cosine_distances(x_shuffled, d_results_sample['min_dist_to_pre_random'][shuffle_i, j], 
+                                        d_results_sample['min_dist_to_post_random'][shuffle_i, j], 
+                                        d_results_sample['dist_index_pre_random'][shuffle_i, j], 
+                                        d_results_sample['dist_index_post_random'][shuffle_i, j], args)

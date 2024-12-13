@@ -126,16 +126,14 @@ def update_res_dict(d_results, X, function, args):
         elif function.lower() == 'knn':
             n_neurons, n_timeframes = x.shape
             n_frames_dt = n_timeframes // args.dt
-            shape_real = (args.dt, n_frames_dt - args.window_size)
-            shape_random = (args.n_shuffles, args.dt, n_frames_dt - args.window_size)
-            d_results[f'sample_{i}'].update({
-                'avg_min_dist_to_preceding': np.empty(shape_real),
-                'avg_min_dist_to_preceding_random': np.empty(shape_random),
-                'avg_min_dist_to_preceding_gauss': np.empty(shape_real),
-                'avg_min_dist_to_following': np.empty(shape_real),
-                'avg_min_dist_to_following_random': np.empty(shape_random),
-                'avg_min_dist_to_following_gauss': np.empty(shape_real)
-                })
+            shape_real = (args.dt, n_frames_dt - args.window_size, args.k)
+            shape_random = (args.n_shuffles, args.dt, n_frames_dt - args.window_size, args.k)
+            for prefix in ['min_dist_to_pre', 'min_dist_to_post', 'dist_index_pre', 'dist_index_post']:
+                d_results[f'sample_{i}'].update({
+                    prefix: np.empty(shape_real),
+                    f'{prefix}_random': np.empty(shape_random),
+                    f'{prefix}_gauss': np.empty(shape_real)
+                    })
             d_results['meta_data']['k'] = args.k
             d_results['meta_data']['window_size'] = args.window_size
             d_results['meta_data']['knn_epsilon'] = args.knn_epsilon
@@ -169,7 +167,7 @@ def get_save_path(args):
 
     save_name = f'{args.function}_{args.data_set}_{args.dt}dt'
     if args.data_set.lower() == 'stringer':
-        save_name += f'_{args.animal_name}_{args.window_size}windowsize'
+        save_name += f'_{args.animal_name}_{args.window_size_stringer}windowsize'
     elif args.data_set.lower() == 'ferret':
         fd = 'FDiff' if args.FDiff else 'Orig'
         save_name += f'{args.EO}EO_{args.condition}_{fd}'
