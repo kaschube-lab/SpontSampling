@@ -84,6 +84,27 @@ def calc_dimensionality_increasing_frames(X, d_results, j, args):
             d_results_sample[f'{args.dim_type}_random'][shuffle_i, j, step] = dim
 
 
+def calc_increasing(X, d_results, step, window, args):
+
+    if window:
+        result = compute_effective_dimensionality_window(X, args.window_size, step=args.step)
+    else:
+        result = compute_effective_dimensionality(X, step=args.step)
+
+    d_results['eff_dim_pca'] = result
+
+    for shuffle_i in range(args.n_shuffles):
+        X_shuffled = X[:, np.random.permutation(X.shape[-1])]
+
+        if window:
+            result = compute_effective_dimensionality_window(X, args.window_size, step=args.step)
+        else:
+            result = compute_effective_dimensionality(X, step=args.step)
+
+        d_results['eff_dim_pca_random'] = result
+
+
+
 def compute_effective_dimensionality(data, step=1):
     """
     Compute the effective dimensionality of neural patterns for incrementally increasing subsets of timeframes.
